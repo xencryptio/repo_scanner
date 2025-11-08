@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Scanner - Enterprise Security Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 24px 0;
+            margin-bottom: 32px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: #2563eb;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        /* Cards */
+        .card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Status Banner */
+        .status-banner {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+            border: 1px solid;
+        }
+
+        .status-banner.error {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .status-banner.success {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+
+        .status-banner.info {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #111827;
+            background: #ffffff;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Buttons */
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading State */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e5e7eb;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .mini-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #fbbf24;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .stat-card.highlight-safe {
+            border-left: 4px solid #10b981;
+        }
+
+        .stat-card.highlight-danger {
+            border-left: 4px solid #ef4444;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .badge-safe {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-unsafe {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-inprogress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-cached {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .badge-failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f9fafb;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #111827;
+        }
+
+        tr.clickable-row {
+            cursor: pointer;
+        }
+
+        tr.clickable-row:hover {
+            background: #f3f4f6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: #9ca3af;
+        }
+
+        /* Expanded Row */
+        .expanded-row {
+            background: #f9fafb;
+        }
+
+        .expanded-content {
+            padding: 24px;
+        }
+
+        /* Algorithm Sections */
+        .algorithm-category {
+            margin-bottom: 24px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+
+        .category-header.safe {
+            border-left: 4px solid #10b981;
+        }
+
+        .category-header.unsafe {
+            border-left: 4px solid #ef4444;
+        }
+
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        /* Algorithm List */
+        .algorithm-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .algorithm-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .algo-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .algo-category {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .algo-stats {
+            display: flex;
+            gap: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* Helper text */
+        .help-text {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">🔐</div>
+                    <div>
+                        <h1>Crypto Scanner</h1>
+                        <div class="subtitle">Post-Quantum Cryptography Security Analysis</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Repository Scan</div>
+                <div class="card-description">Analyze GitHub repositories for cryptographic algorithm usage and PQC readiness</div>
+            </div>
+
+            <div id="statusBanner" class="status-banner"></div>
+
+            <div class="form-group">
+                <label for="repoUrl">GitHub Repository URL</label>
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="repoUrl" 
+                        placeholder="https://github.com/username/repository"
+                        
+                    >
+                    <button onclick="scanRepository()" id="scanBtn" class="btn-primary">Scan Repository</button>
+                </div>
+                <!-- <div class="help-text">
+                    Scans are queued and processed by a background worker. Click "Refresh History" to check progress.
+                </div> -->
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div class="card-title">Scan History</div>
+                        <!-- <div class="card-description">View previous repository scans. Click "Refresh" to update status.</div> -->
+                    </div>
+                    <button onclick="refreshHistory()" id="refreshBtn" class="btn-secondary">
+                        <span id="refreshIcon">🔄</span> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Status</th>
+                            <th>Last Updated</th>
+                            <th>Files</th>
+                            <th>PQC Safe</th>
+                            <th>PQC Vulnerable</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">Loading history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let expandedRows = new Set();
+        let scanDetailsCache = new Map();
+
+        function showStatus(message, type = 'info') {
+            const banner = document.getElementById('statusBanner');
+            banner.className = `status-banner ${type}`;
+            banner.textContent = message;
+            banner.style.display = 'block';
+            
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, 5000);
+        }
+
+        async function scanRepository() {
+            const repoUrlInput = document.getElementById('repoUrl');
+            const repoUrl = repoUrlInput.value.trim();
+            const scanBtn = document.getElementById('scanBtn');
+
+            if (!repoUrl) {
+                showStatus('Please enter a repository URL', 'error');
+                return;
+            }
+
+            const originalButtonText = scanBtn.innerHTML;
+            scanBtn.innerHTML = '<span class="spinner"></span>Submitting...';
+            scanBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/scan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ repo_url: repoUrl }),
+                    signal: AbortSignal.timeout(120000)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Scan failed');
+                }
+
+                if (data.cached) {
+                    showStatus('✓ Using cached scan results', 'success');
+                    scanBtn.innerHTML = '✓ Used Cache';
+                } else {
+                    showStatus('✓ Scan queued successfully! Click "Refresh" to check progress.', 'success');
+                    scanBtn.innerHTML = '✓ Queued';
+                }
+
+                // Refresh history ONCE to show new scan
+                await loadHistory();
+
+            } catch (error) {
+                if (error.name === 'TimeoutError') {
+                    showStatus('Request timeout - Please check if the backend is running', 'error');
+                } else if (error.message.includes('Failed to fetch')) {
+                    showStatus('Cannot connect to backend server. Ensure Flask is running.', 'error');
+                } else {
+                    showStatus(error.message, 'error');
+                }
+            } finally {
+                setTimeout(() => {
+                    scanBtn.innerHTML = originalButtonText;
+                    scanBtn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        async function refreshHistory() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const refreshIcon = document.getElementById('refreshIcon');
+            
+            refreshIcon.style.display = 'inline-block';
+            refreshIcon.style.animation = 'spin 0.8s linear infinite';
+            refreshBtn.disabled = true;
+            
+            await loadHistory();
+            
+            setTimeout(() => {
+                refreshIcon.style.animation = 'none';
+                refreshBtn.disabled = false;
+            }, 500);
+        }
+
+        async function loadHistory() {
+            const tbody = document.getElementById('historyBody');
+            
+            try {
+                const response = await fetch(`${API_URL}/scans`);
+                const scans = await response.json();
+                
+                if (scans.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No scans yet</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = renderScansHtml(scans);
+
+            } catch (error) {
+                console.error('Failed to load history:', error);
+                showStatus('Failed to fetch scan history', 'error');
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Failed to load history</td></tr>';
+            }
+        }
+
+        function renderScansHtml(scans) {
+            return scans.map(scan => {
+                let statusBadge;
+                const canView = scan.scan_status === 'completed' || scan.scan_status === 'cached';
+                const isExpanded = expandedRows.has(scan.id);
+                
+                const fileCountDisplay = (scan.scan_status === 'in_progress' && scan.total_files_to_scan > 0) 
+                    ? `${scan.total_files || 0} / ${scan.total_files_to_scan}` 
+                    : (scan.total_files || '-');
+
+                const safeCount = scan.pqc_safe_count || '-';
+                const unsafeCount = scan.pqc_vulnerable_count || '-';
+                
+                let statusMessageHtml = '';
+                
+                switch(scan.scan_status) {
+                    case 'pending':
+                        statusBadge = '<span class="badge-pending status-badge">⏳ Queued</span>';
+                        statusMessageHtml = `<div style="font-size: 13px; color: #92400e; margin-top: 4px;">Waiting for worker...</div>`;
+                        break;
+                    case 'in_progress':
+                        statusBadge = '<span class="badge-inprogress status-badge"><span class="mini-spinner"></span>In Progress</span>';
+                        statusMessageHtml = `<div style="font-size: 13px; color: #1e40af; margin-top: 4px;">${scan.current_status || 'Processing...'}</div>`;
+                        break;
+                    case 'completed':
+                        statusBadge = '<span class="badge-completed status-badge">✓ Completed</span>';
+                        break;
+                    case 'failed':
+                        statusBadge = '<span class="badge-failed status-badge">✗ Failed</span>';
+                        statusMessageHtml = `<div style="font-size: 13px; color: #ef4444; margin-top: 4px;">${scan.current_status || 'Error'}</div>`;
+                        break;
+                    case 'cached':
+                        statusBadge = '<span class="badge-cached status-badge">📦 Cached</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge-pending status-badge">Unknown</span>';
+                }
+                
+                return `
+                    <tr 
+                        id="row-${scan.id}" 
+                        ${canView ? `onclick="toggleRow(${scan.id})" class="clickable-row"` : ''}
+                    >
+                        <td>${scan.repo_url}</td>
+                        <td>
+                            ${statusBadge}
+                            ${statusMessageHtml}
+                        </td>
+                        <td>${new Date(scan.last_scanned).toLocaleString()}</td>
+                        <td>${fileCountDisplay}</td>
+                        <td style="color: #10b981; font-weight: 600;">${safeCount}</td>
+                        <td style="color: #ef4444; font-weight: 600;">${unsafeCount}</td>
+                        <td>
+                            ${canView ? `
+                                <button class="btn-secondary" id="btn-${scan.id}" onclick="event.stopPropagation(); toggleRow(${scan.id});">
+                                    ${isExpanded ? 'Hide' : 'View'}
+                                </button>
+                            ` : `
+                                <button class="btn-secondary" disabled>
+                                    ${scan.scan_status === 'pending' ? 'Queued' : scan.scan_status === 'in_progress' ? 'Scanning...' : 'Failed'}
+                                </button>
+                            `}
+                        </td>
+                    </tr>
+                    ${canView ? `
+                    <tr id="expanded-${scan.id}" class="expanded-row" style="display: ${isExpanded ? 'table-row' : 'none'};">
+                        <td colspan="7">
+                            <div class="expanded-content" id="content-${scan.id}">
+                                ${isExpanded && scanDetailsCache.has(scan.id) 
+                                    ? renderExpandedContent(scanDetailsCache.get(scan.id)) 
+                                    : '<div style="text-align: center; color: #6b7280;">Loading details...</div>'
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    ` : ''}
+                `;
+            }).join('');
+        }
+
+        async function toggleRow(scanId) {
+            const expandedRow = document.getElementById(`expanded-${scanId}`);
+            const contentDiv = document.getElementById(`content-${scanId}`);
+            const buttonId = `btn-${scanId}`;
+            
+            if (!expandedRow) return;
+
+            if (expandedRows.has(scanId)) {
+                // Collapse
+                expandedRow.style.display = 'none';
+                expandedRows.delete(scanId);
+                // Update button text without reloading
+                const btn = document.querySelector(`#${buttonId}`);
+                if (btn) btn.textContent = 'View';
+            } else {
+                // Expand
+                expandedRow.style.display = 'table-row';
+                expandedRows.add(scanId);
+                // Update button text without reloading
+                const btn = document.querySelector(`#${buttonId}`);
+                if (btn) btn.textContent = 'Hide';
+                
+                if (!scanDetailsCache.has(scanId)) {
+                    try {
+                        contentDiv.innerHTML = '<div style="text-align: center; color: #6b7280;">Loading details...</div>';
+                        const response = await fetch(`${API_URL}/scans/${scanId}`);
+                        const data = await response.json();
+                        scanDetailsCache.set(scanId, data);
+                        contentDiv.innerHTML = renderExpandedContent(data);
+                    } catch (error) {
+                        console.error('Failed to load scan details:', error);
+                        contentDiv.innerHTML = '<div style="color: #ef4444;">Failed to load scan details</div>';
+                    }
+                }
+            }
+        }
+
+        function renderExpandedContent(data) {
+            const algorithms = data.algorithms || {};
+            const safe = [];
+            const unsafe = [];
+
+            Object.entries(algorithms).forEach(([name, info]) => {
+                if (info.pqc_safe) {
+                    safe.push({ name, ...info });
+                } else {
+                    unsafe.push({ name, ...info });
+                }
+            });
+
+            let html = `
+                <div style="margin-bottom: 20px;">
+                    <div style="background: #f3f4f6; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 14px;">
+                            <div><strong>Commit Hash:</strong> <code>${data.repo_hash}</code></div>
+                            <div><strong>Last Scanned:</strong> ${new Date(data.last_scanned).toLocaleString()}</div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Files Scanned</div>
+                            <div class="stat-value">${data.total_files || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Algorithms Found</div>
+                            <div class="stat-value">${Object.keys(algorithms).length}</div>
+                        </div>
+                        <div class="stat-card highlight-safe">
+                            <div class="stat-label">PQC Safe</div>
+                            <div class="stat-value" style="color: #10b981;">${safe.length}</div>
+                        </div>
+                        <div class="stat-card highlight-danger">
+                            <div class="stat-label">PQC Vulnerable</div>
+                            <div class="stat-value" style="color: #ef4444;">${unsafe.length}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (unsafe.length > 0) {
+                html += createAlgorithmSection('PQC Vulnerable Algorithms', unsafe, 'unsafe');
+            }
+
+            if (safe.length > 0) {
+                html += createAlgorithmSection('PQC Safe Algorithms', safe, 'safe');
+            }
+
+            return html;
+        }
+
+        function createAlgorithmSection(title, algorithms, type) {
+            const badgeClass = type === 'safe' ? 'badge-safe' : 'badge-unsafe';
+            const categoryClass = type === 'safe' ? 'safe' : 'unsafe';
+
+            let html = `
+                <div class="algorithm-category">
+                    <div class="category-header ${categoryClass}">
+                        <div class="category-title">
+                            <span>${title}</span>
+                        </div>
+                        <span class="status-badge ${badgeClass}">${algorithms.length} Found</span>
+                    </div>
+                    <div class="algorithm-list">
+            `;
+
+            algorithms.forEach(algo => {
+                html += `
+                    <div class="algorithm-card">
+                        <div class="algo-name">${algo.name}</div>
+                        <div class="algo-category">${algo.category}</div>
+                        <div class="algo-stats">
+                            <span>${algo.occurrences} occurrences</span>
+                            <span>${algo.files_affected || 0} files</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div></div>';
+            return html;
+        }
+
+        // IMPORTANT: Initial load ONLY on page load - NO AUTO-REFRESH
+        window.addEventListener('load', () => {
+            loadHistory();
+        });
+
+        // Enter key support for scan input
+        document.getElementById('repoUrl').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') scanRepository();
+        });
+    </script>
+</body>
+</html>

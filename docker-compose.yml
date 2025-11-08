@@ -1,0 +1,22 @@
+services:
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crypto_scanner_backend
+    expose:
+      - "5000"
+    volumes:
+      - .:/app
+    restart: always
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: crypto_scanner_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - flask
+    restart: always
