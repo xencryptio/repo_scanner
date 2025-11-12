@@ -440,6 +440,32 @@
             font-family: 'Monaco', 'Menlo', monospace;
             font-size: 12px;
         }
+
+        /* NEW: Flex container for the two input fields */
+        .input-split {
+            display: flex;
+            gap: 16px;
+        }
+
+        .input-split > div {
+            flex: 1;
+        }
+        
+        .repo-info-cell {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .repo-url-text {
+            font-weight: 500;
+        }
+        
+        .repo-branch-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
     </style>
 </head>
 <body>
@@ -466,20 +492,30 @@
 
             <div id="statusBanner" class="status-banner"></div>
 
-            <div class="form-group">
-                <label for="repoUrl">GitHub Repository URL</label>
-                <div class="input-group">
+            <div class="input-split">
+                <div class="form-group">
+                    <label for="repoUrl">GitHub Repository URL</label>
                     <input 
                         type="text" 
                         id="repoUrl" 
                         placeholder="https://github.com/username/repository"
-                        
                     >
+                </div>
+                <div class="form-group" style="max-width: 200px;">
+                    <label for="repoBranch">Branch Name (Default: main)</label>
+                    <input 
+                        type="text" 
+                        id="repoBranch" 
+                        placeholder="main"
+                        value="main"
+                    >
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="input-group" style="flex-direction: row-reverse;">
                     <button onclick="scanRepository()" id="scanBtn" class="btn-primary">Scan Repository</button>
                 </div>
-                <!-- <div class="help-text">
-                    Scans are queued and processed by a background worker. Click "Refresh History" to check progress.
-                </div> -->
             </div>
         </div>
 
@@ -488,7 +524,6 @@
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div class="card-title">Scan History</div>
-                        <!-- <div class="card-description">View previous repository scans. Click "Refresh" to update status.</div> -->
                     </div>
                     <button onclick="refreshHistory()" id="refreshBtn" class="btn-secondary">
                         <span id="refreshIcon">🔄</span> Refresh
@@ -500,7 +535,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Repository</th>
+                            <th>Repository & Branch</th>
                             <th>Status</th>
                             <th>Last Updated</th>
                             <th>Files</th>
@@ -537,7 +572,9 @@
 
         async function scanRepository() {
             const repoUrlInput = document.getElementById('repoUrl');
+            const repoBranchInput = document.getElementById('repoBranch'); // NEW
             const repoUrl = repoUrlInput.value.trim();
+            const repoBranch = repoBranchInput.value.trim() || 'main'; // NEW: Default to 'main'
             const scanBtn = document.getElementById('scanBtn');
 
             if (!repoUrl) {
@@ -553,7 +590,8 @@
                 const response = await fetch(`${API_URL}/scan`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ repo_url: repoUrl }),
+                    // NEW: Include repo_branch in the body
+                    body: JSON.stringify({ repo_url: repoUrl, branch_name: repoBranch }), 
                     signal: AbortSignal.timeout(120000)
                 });
 
@@ -567,7 +605,7 @@
                     showStatus('✓ Using cached scan results', 'success');
                     scanBtn.innerHTML = '✓ Used Cache';
                 } else {
-                    showStatus('✓ Scan queued successfully! Click "Refresh" to check progress.', 'success');
+                    showStatus(`✓ Scan queued successfully for branch "${data.branch_name}"! Click "Refresh" to check progress.`, 'success');
                     scanBtn.innerHTML = '✓ Queued';
                 }
 
@@ -665,12 +703,20 @@
                         statusBadge = '<span class="badge-pending status-badge">Unknown</span>';
                 }
                 
+                // NEW: Repo/Branch display cell
+                const repoCellHtml = `
+                    <div class="repo-info-cell">
+                        <div class="repo-url-text">${scan.repo_url}</div>
+                        <div class="repo-branch-text">Branch: <code>${scan.branch_name || 'main'}</code></div>
+                    </div>
+                `;
+                
                 return `
                     <tr 
                         id="row-${scan.id}" 
                         ${canView ? `onclick="toggleRow(${scan.id})" class="clickable-row"` : ''}
                     >
-                        <td>${scan.repo_url}</td>
+                        <td>${repoCellHtml}</td>
                         <td>
                             ${statusBadge}
                             ${statusMessageHtml}
@@ -761,6 +807,8 @@
                 <div style="margin-bottom: 20px;">
                     <div style="background: #f3f4f6; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 14px;">
+                            <div><strong>Repo URL:</strong> ${data.repo_url}</div>
+                            <div><strong>Branch:</strong> <code>${data.branch_name || 'main'}</code></div>
                             <div><strong>Commit Hash:</strong> <code>${data.repo_hash}</code></div>
                             <div><strong>Last Scanned:</strong> ${new Date(data.last_scanned).toLocaleString()}</div>
                         </div>
@@ -837,6 +885,11 @@
 
         // Enter key support for scan input
         document.getElementById('repoUrl').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') scanRepository();
+        });
+        
+        // Enter key support for branch input
+        document.getElementById('repoBranch').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') scanRepository();
         });
     </script>
