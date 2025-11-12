@@ -5,31 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Scanner - Enterprise Security Analysis</title>
     <style>
+        /* Premium Enterprise Security Dashboard Styling */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --color-bg-primary: #F8FAFC;
+            --color-bg-card: #FFFFFF;
+            --color-border: #E2E8F0;
+            --color-text-dark: #1E293B;
+            --color-text-medium: #64748B;
+            --color-primary-blue: #1D4ED8; /* Deep Blue for Action */
+            --color-primary-hover: #1E40AF;
+            --color-success: #047857; /* Dark Green */
+            --color-danger: #B91C1C; /* Dark Red */
+            --color-info: #2563EB;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f7fa;
-            color: #1a1a1a;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-dark);
             line-height: 1.6;
+            font-size: 15px; /* Slightly larger base font */
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 40px; /* Increased padding */
         }
 
         /* Header */
         header {
-            background: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 24px 0;
-            margin-bottom: 32px;
+            background: var(--color-bg-card);
+            border-bottom: 1px solid var(--color-border);
+            padding: 32px 0; /* Increased vertical padding */
+            margin-bottom: 40px; /* Increased margin */
         }
 
         .header-content {
@@ -41,99 +56,112 @@
         .logo-section {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
         }
 
         .logo {
-            width: 48px;
-            height: 48px;
-            background: #2563eb;
-            border-radius: 8px;
+            width: 56px;
+            height: 56px;
+            background: #004466; /* Deep Teal Logo Background */
+            box-shadow: 0 4px 8px rgba(0, 68, 102, 0.2);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
+            color: white;
         }
 
         h1 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #111827;
-            letter-spacing: -0.025em;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-text-dark);
+            letter-spacing: -0.05em;
         }
 
         .subtitle {
-            color: #6b7280;
-            font-size: 14px;
+            color: var(--color-text-medium);
+            font-size: 15px;
             font-weight: 400;
         }
 
         /* Cards */
         .card {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 24px;
+            background: var(--color-bg-card);
+            /* Subtle Shadow for Premium Feel */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03);
+            border-radius: 16px; /* More rounded corners */
+            padding: 32px; /* Increased padding */
+            margin-bottom: 32px;
         }
 
         .card-header {
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--color-border);
         }
 
         .card-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
-            color: #111827;
+            color: var(--color-text-dark);
             margin-bottom: 4px;
         }
 
         .card-description {
-            font-size: 14px;
-            color: #6b7280;
+            font-size: 15px;
+            color: var(--color-text-medium);
         }
 
         /* Status Banner */
         .status-banner {
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin-bottom: 20px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
             display: none;
-            font-size: 14px;
+            font-size: 15px;
             border: 1px solid;
+            font-weight: 500;
         }
 
         .status-banner.error {
-            background: #fee2e2;
-            border-color: #ef4444;
-            color: #991b1b;
+            background: #FEF2F2;
+            border-color: #F87171;
+            color: var(--color-danger);
         }
 
         .status-banner.success {
-            background: #d1fae5;
-            border-color: #10b981;
-            color: #065f46;
+            background: #ECFDF5;
+            border-color: #34D399;
+            color: var(--color-success);
         }
 
         .status-banner.info {
-            background: #dbeafe;
-            border-color: #3b82f6;
-            color: #1e40af;
+            background: #EFF6FF;
+            border-color: #60A5FA;
+            color: var(--color-info);
         }
 
         /* Form Elements */
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+        }
+        
+        /* NEW ALIGNMENT STYLES */
+        .form-group-flex-row {
+            display: flex;
+            /* Align input and button bottoms */
+            align-items: flex-end; 
+            gap: 16px; 
+            margin-bottom: 0;
         }
 
         label {
             display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 8px;
+            font-size: 15px;
+            font-weight: 600; /* Bolder labels */
+            color: var(--color-text-dark);
+            margin-bottom: 10px;
         }
 
         .input-group {
@@ -143,50 +171,54 @@
 
         input[type="text"] {
             flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            color: #111827;
-            background: #ffffff;
+            padding: 12px 16px; /* Larger input field */
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 16px;
+            color: var(--color-text-dark);
+            background: var(--color-bg-card);
             transition: all 0.2s;
         }
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            border-color: var(--color-primary-blue);
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15); /* Stronger focus shadow */
         }
 
         /* Buttons */
         button {
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 6px;
+            padding: 12px 24px; /* Larger buttons */
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
             white-space: nowrap;
+            height: 44px; /* Fix height to align perfectly with input field (12px padding + 16px font + 1px border * 2) */
         }
+        
+        /* Removed scan-btn-fixed as horizontal alignment is handled by form-group-flex-row */
 
         .btn-primary {
-            background: #2563eb;
+            background: var(--color-primary-blue);
             color: white;
         }
 
         .btn-primary:hover:not(:disabled) {
-            background: #1d4ed8;
+            background: var(--color-primary-hover);
         }
 
         .btn-secondary {
-            background: #ffffff;
-            color: #374151;
-            border: 1px solid #d1d5db;
+            background: var(--color-bg-card);
+            color: var(--color-text-dark);
+            border: 1px solid var(--color-border);
         }
 
-        .btn-secondary:hover {
-            background: #f9fafb;
+        .btn-secondary:hover:not(:disabled) {
+            background: #F1F5F9;
+            border-color: #CBD5E1;
         }
 
         button:disabled {
@@ -198,8 +230,8 @@
         .spinner {
             width: 16px;
             height: 16px;
-            border: 2px solid #e5e7eb;
-            border-top-color: #2563eb;
+            border: 2px solid #E2E8F0;
+            border-top-color: var(--color-primary-blue);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             display: inline-block;
@@ -215,8 +247,8 @@
             display: inline-block;
             width: 14px;
             height: 14px;
-            border: 2px solid #fbbf24;
-            border-top-color: transparent;
+            border: 2px solid #FEF08A; /* Light yellow border */
+            border-top-color: #FACC15; /* Golden top border */
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
             margin-right: 8px;
@@ -227,111 +259,87 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
+            gap: 24px; /* Increased gap */
             margin-bottom: 24px;
         }
 
         .stat-card {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 20px;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 24px;
         }
 
         .stat-card.highlight-safe {
-            border-left: 4px solid #10b981;
+            border-left: 4px solid var(--color-success);
         }
 
         .stat-card.highlight-danger {
-            border-left: 4px solid #ef4444;
+            border-left: 4px solid var(--color-danger);
         }
 
         .stat-label {
-            font-size: 13px;
-            color: #6b7280;
-            font-weight: 500;
+            font-size: 14px;
+            color: var(--color-text-medium);
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.08em; /* Tighter tracking for enterprise labels */
             margin-bottom: 8px;
         }
 
         .stat-value {
-            font-size: 32px;
-            font-weight: 600;
-            color: #111827;
+            font-size: 38px; /* Larger, more impactful number */
+            font-weight: 700;
+            color: var(--color-text-dark);
         }
 
         /* Status Badges */
         .status-badge {
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
         }
 
-        .badge-safe {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-unsafe {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-inprogress {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .badge-completed {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-cached {
-            background: #e0e7ff;
-            color: #3730a3;
-        }
-
-        .badge-failed {
-            background: #fee2e2;
-            color: #991b1b;
-        }
+        .badge-safe { background: #ECFDF5; color: var(--color-success); }
+        .badge-unsafe { background: #FEF2F2; color: var(--color-danger); }
+        .badge-pending { background: #FFFBEB; color: #B45309; }
+        .badge-inprogress { background: #EFF6FF; color: var(--color-info); }
+        .badge-completed { background: #ECFDF5; color: var(--color-success); }
+        .badge-cached { background: #EEF2FF; color: #4338CA; }
+        .badge-failed { background: #FEF2F2; color: var(--color-danger); }
 
         /* Table */
         .table-container {
             overflow-x: auto;
-            margin-top: 20px;
+            margin-top: 24px;
+            border: 1px solid var(--color-border); /* Add an external border to the container */
+            border-radius: 8px;
+            overflow: hidden; /* Ensures border-radius applies to table */
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         th {
-            background: #f9fafb;
-            padding: 12px 16px;
+            background: #F1F5F9; /* Softer header background */
+            padding: 14px 20px; /* Increased padding */
             text-align: left;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-text-dark);
+            border-bottom: 1px solid var(--color-border);
+            font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
         td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #e5e7eb;
-            color: #111827;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-dark);
         }
 
         tr.clickable-row {
@@ -339,81 +347,82 @@
         }
 
         tr.clickable-row:hover {
-            background: #f3f4f6;
+            background: #F8FAFC; /* Subtle hover effect */
         }
 
         .empty-state {
             text-align: center;
-            padding: 48px;
-            color: #9ca3af;
+            padding: 64px;
+            color: var(--color-text-medium);
         }
 
         /* Expanded Row */
         .expanded-row {
-            background: #f9fafb;
+            background: #F1F5F9; /* Darker expanded row background */
         }
 
         .expanded-content {
-            padding: 24px;
+            padding: 32px;
         }
 
         /* Algorithm Sections */
         .algorithm-category {
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
 
         .category-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
+            padding: 18px;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .category-header.safe {
-            border-left: 4px solid #10b981;
+            border-left: 6px solid var(--color-success);
         }
 
         .category-header.unsafe {
-            border-left: 4px solid #ef4444;
+            border-left: 6px solid var(--color-danger);
         }
 
         .category-title {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-text-dark);
         }
 
         /* Algorithm List */
         .algorithm-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 12px;
-            margin-top: 12px;
+            gap: 16px;
+            margin-top: 16px;
         }
 
         .algorithm-card {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 16px;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 20px;
         }
 
         .algo-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #111827;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-dark);
             margin-bottom: 4px;
         }
 
         .algo-category {
-            font-size: 13px;
-            color: #6b7280;
+            font-size: 14px;
+            color: var(--color-text-medium);
             margin-bottom: 12px;
         }
 
@@ -421,34 +430,36 @@
             display: flex;
             gap: 16px;
             padding-top: 12px;
-            border-top: 1px solid #e5e7eb;
-            font-size: 13px;
-            color: #6b7280;
+            border-top: 1px solid var(--color-border);
+            font-size: 14px;
+            color: var(--color-text-medium);
         }
 
         /* Helper text */
         .help-text {
-            font-size: 13px;
-            color: #6b7280;
+            font-size: 14px;
+            color: var(--color-text-medium);
             margin-top: 8px;
         }
 
         code {
-            background: #f3f4f6;
-            padding: 2px 6px;
-            border-radius: 3px;
+            background: #E5E7EB;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
         }
 
         /* NEW: Flex container for the two input fields */
         .input-split {
             display: flex;
-            gap: 16px;
+            gap: 24px;
         }
 
         .input-split > div {
-            flex: 1;
+            /* Handled by inline styles */
         }
         
         .repo-info-cell {
@@ -457,13 +468,13 @@
         }
         
         .repo-url-text {
-            font-weight: 500;
+            font-weight: 600;
         }
         
         .repo-branch-text {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
+            font-size: 13px;
+            color: var(--color-text-medium);
+            margin-top: 6px;
         }
 
     </style>
@@ -493,7 +504,7 @@
             <div id="statusBanner" class="status-banner"></div>
 
             <div class="input-split">
-                <div class="form-group">
+                <div class="form-group" style="flex: 2;">
                     <label for="repoUrl">GitHub Repository URL</label>
                     <input 
                         type="text" 
@@ -501,29 +512,31 @@
                         placeholder="https://github.com/username/repository"
                     >
                 </div>
-                <div class="form-group" style="max-width: 200px;">
+
+                <div class="form-group" style="width: 400px; flex: 0 0 400px;">
                     <label for="repoBranch">Branch Name (Default: main)</label>
-                    <input 
-                        type="text" 
-                        id="repoBranch" 
-                        placeholder="main"
-                        value="main"
-                    >
+                    
+                    <div class="form-group-flex-row">
+                        <input 
+                            type="text" 
+                            id="repoBranch" 
+                            placeholder="main"
+                            value="main"
+                            style="flex: 1;"
+                        >
+                        <button onclick="scanRepository()" id="scanBtn" class="btn-primary">Scan Repository</button>
+                    </div>
                 </div>
             </div>
             
-            <div class="form-group">
-                <div class="input-group" style="flex-direction: row-reverse;">
-                    <button onclick="scanRepository()" id="scanBtn" class="btn-primary">Scan Repository</button>
-                </div>
             </div>
-        </div>
 
         <div class="card">
             <div class="card-header">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div class="card-title">Scan History</div>
+                        <div class="card-description">Review previous analysis results for your codebases.</div>
                     </div>
                     <button onclick="refreshHistory()" id="refreshBtn" class="btn-secondary">
                         <span id="refreshIcon">🔄</span> Refresh
@@ -539,8 +552,8 @@
                             <th>Status</th>
                             <th>Last Updated</th>
                             <th>Files</th>
-                            <th>PQC Safe</th>
-                            <th>PQC Vulnerable</th>
+                            <th style="color: var(--color-success);">PQC Safe</th>
+                            <th style="color: var(--color-danger);">PQC Vulnerable</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -572,9 +585,9 @@
 
         async function scanRepository() {
             const repoUrlInput = document.getElementById('repoUrl');
-            const repoBranchInput = document.getElementById('repoBranch'); // NEW
+            const repoBranchInput = document.getElementById('repoBranch');
             const repoUrl = repoUrlInput.value.trim();
-            const repoBranch = repoBranchInput.value.trim() || 'main'; // NEW: Default to 'main'
+            const repoBranch = repoBranchInput.value.trim() || 'main';
             const scanBtn = document.getElementById('scanBtn');
 
             if (!repoUrl) {
@@ -590,7 +603,6 @@
                 const response = await fetch(`${API_URL}/scan`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // NEW: Include repo_branch in the body
                     body: JSON.stringify({ repo_url: repoUrl, branch_name: repoBranch }), 
                     signal: AbortSignal.timeout(120000)
                 });
@@ -636,6 +648,8 @@
             refreshIcon.style.animation = 'spin 0.8s linear infinite';
             refreshBtn.disabled = true;
             
+            // Clear cache on refresh to ensure fresh details are loaded if opened
+            scanDetailsCache.clear();
             await loadHistory();
             
             setTimeout(() => {
@@ -683,18 +697,18 @@
                 switch(scan.scan_status) {
                     case 'pending':
                         statusBadge = '<span class="badge-pending status-badge">⏳ Queued</span>';
-                        statusMessageHtml = `<div style="font-size: 13px; color: #92400e; margin-top: 4px;">Waiting for worker...</div>`;
+                        statusMessageHtml = `<div style="font-size: 13px; color: #B45309; margin-top: 4px; font-weight: 500;">Waiting for worker...</div>`;
                         break;
                     case 'in_progress':
                         statusBadge = '<span class="badge-inprogress status-badge"><span class="mini-spinner"></span>In Progress</span>';
-                        statusMessageHtml = `<div style="font-size: 13px; color: #1e40af; margin-top: 4px;">${scan.current_status || 'Processing...'}</div>`;
+                        statusMessageHtml = `<div style="font-size: 13px; color: var(--color-info); margin-top: 4px; font-weight: 500;">${scan.current_status || 'Processing...'}</div>`;
                         break;
                     case 'completed':
                         statusBadge = '<span class="badge-completed status-badge">✓ Completed</span>';
                         break;
                     case 'failed':
                         statusBadge = '<span class="badge-failed status-badge">✗ Failed</span>';
-                        statusMessageHtml = `<div style="font-size: 13px; color: #ef4444; margin-top: 4px;">${scan.current_status || 'Error'}</div>`;
+                        statusMessageHtml = `<div style="font-size: 13px; color: var(--color-danger); margin-top: 4px; font-weight: 500;">${scan.current_status || 'Error'}</div>`;
                         break;
                     case 'cached':
                         statusBadge = '<span class="badge-cached status-badge">📦 Cached</span>';
@@ -703,7 +717,7 @@
                         statusBadge = '<span class="badge-pending status-badge">Unknown</span>';
                 }
                 
-                // NEW: Repo/Branch display cell
+                // Repo/Branch display cell
                 const repoCellHtml = `
                     <div class="repo-info-cell">
                         <div class="repo-url-text">${scan.repo_url}</div>
@@ -723,12 +737,12 @@
                         </td>
                         <td>${new Date(scan.last_scanned).toLocaleString()}</td>
                         <td>${fileCountDisplay}</td>
-                        <td style="color: #10b981; font-weight: 600;">${safeCount}</td>
-                        <td style="color: #ef4444; font-weight: 600;">${unsafeCount}</td>
+                        <td style="color: var(--color-success); font-weight: 700;">${safeCount}</td>
+                        <td style="color: var(--color-danger); font-weight: 700;">${unsafeCount}</td>
                         <td>
                             ${canView ? `
                                 <button class="btn-secondary" id="btn-${scan.id}" onclick="event.stopPropagation(); toggleRow(${scan.id});">
-                                    ${isExpanded ? 'Hide' : 'View'}
+                                    ${isExpanded ? 'Hide Details' : 'View Details'}
                                 </button>
                             ` : `
                                 <button class="btn-secondary" disabled>
@@ -743,7 +757,7 @@
                             <div class="expanded-content" id="content-${scan.id}">
                                 ${isExpanded && scanDetailsCache.has(scan.id) 
                                     ? renderExpandedContent(scanDetailsCache.get(scan.id)) 
-                                    : '<div style="text-align: center; color: #6b7280;">Loading details...</div>'
+                                    : '<div style="text-align: center; color: var(--color-text-medium); padding: 20px;"><span class="spinner"></span> Loading details...</div>'
                                 }
                             </div>
                         </td>
@@ -764,27 +778,27 @@
                 // Collapse
                 expandedRow.style.display = 'none';
                 expandedRows.delete(scanId);
-                // Update button text without reloading
+                // Update button text
                 const btn = document.querySelector(`#${buttonId}`);
-                if (btn) btn.textContent = 'View';
+                if (btn) btn.textContent = 'View Details';
             } else {
                 // Expand
                 expandedRow.style.display = 'table-row';
                 expandedRows.add(scanId);
-                // Update button text without reloading
+                // Update button text
                 const btn = document.querySelector(`#${buttonId}`);
-                if (btn) btn.textContent = 'Hide';
+                if (btn) btn.textContent = 'Hide Details';
                 
                 if (!scanDetailsCache.has(scanId)) {
                     try {
-                        contentDiv.innerHTML = '<div style="text-align: center; color: #6b7280;">Loading details...</div>';
+                        contentDiv.innerHTML = '<div style="text-align: center; color: var(--color-text-medium); padding: 20px;"><span class="spinner"></span> Loading details...</div>';
                         const response = await fetch(`${API_URL}/scans/${scanId}`);
                         const data = await response.json();
                         scanDetailsCache.set(scanId, data);
                         contentDiv.innerHTML = renderExpandedContent(data);
                     } catch (error) {
                         console.error('Failed to load scan details:', error);
-                        contentDiv.innerHTML = '<div style="color: #ef4444;">Failed to load scan details</div>';
+                        contentDiv.innerHTML = '<div style="color: var(--color-danger); text-align: center;">Failed to load scan details</div>';
                     }
                 }
             }
@@ -804,10 +818,10 @@
             });
 
             let html = `
-                <div style="margin-bottom: 20px;">
-                    <div style="background: #f3f4f6; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 14px;">
-                            <div><strong>Repo URL:</strong> ${data.repo_url}</div>
+                <div style="margin-bottom: 24px;">
+                    <div style="background: #E2E8F0; padding: 20px; border-radius: 10px; margin-bottom: 24px; font-weight: 500;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; font-size: 14px; color: #475569;">
+                            <div><strong>Repo URL:</strong> <a href="${data.repo_url}" target="_blank" style="color: var(--color-primary-blue); text-decoration: none;">${data.repo_url}</a></div>
                             <div><strong>Branch:</strong> <code>${data.branch_name || 'main'}</code></div>
                             <div><strong>Commit Hash:</strong> <code>${data.repo_hash}</code></div>
                             <div><strong>Last Scanned:</strong> ${new Date(data.last_scanned).toLocaleString()}</div>
@@ -825,11 +839,11 @@
                         </div>
                         <div class="stat-card highlight-safe">
                             <div class="stat-label">PQC Safe</div>
-                            <div class="stat-value" style="color: #10b981;">${safe.length}</div>
+                            <div class="stat-value" style="color: var(--color-success);">${safe.length}</div>
                         </div>
                         <div class="stat-card highlight-danger">
                             <div class="stat-label">PQC Vulnerable</div>
-                            <div class="stat-value" style="color: #ef4444;">${unsafe.length}</div>
+                            <div class="stat-value" style="color: var(--color-danger);">${unsafe.length}</div>
                         </div>
                     </div>
                 </div>
@@ -878,7 +892,7 @@
             return html;
         }
 
-        // IMPORTANT: Initial load ONLY on page load - NO AUTO-REFRESH
+        // IMPORTANT: Initial load ONLY on page load
         window.addEventListener('load', () => {
             loadHistory();
         });
