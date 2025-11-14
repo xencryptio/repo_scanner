@@ -18,10 +18,10 @@
             --color-border: #E2E8F0;
             --color-text-dark: #1E293B;
             --color-text-medium: #64748B;
-            --color-primary-blue: #1D4ED8; /* Deep Blue for Action */
+            --color-primary-blue: #1D4ED8;
             --color-primary-hover: #1E40AF;
-            --color-success: #047857; /* Dark Green */
-            --color-danger: #B91C1C; /* Dark Red */
+            --color-success: #047857;
+            --color-danger: #B91C1C;
             --color-info: #2563EB;
         }
 
@@ -30,21 +30,21 @@
             background: var(--color-bg-primary);
             color: var(--color-text-dark);
             line-height: 1.6;
-            font-size: 15px; /* Slightly larger base font */
+            font-size: 15px;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 40px; /* Increased padding */
+            padding: 0 40px;
         }
 
         /* Header */
         header {
             background: var(--color-bg-card);
             border-bottom: 1px solid var(--color-border);
-            padding: 32px 0; /* Increased vertical padding */
-            margin-bottom: 40px; /* Increased margin */
+            padding: 32px 0;
+            margin-bottom: 40px;
         }
 
         .header-content {
@@ -62,7 +62,7 @@
         .logo {
             width: 56px;
             height: 56px;
-            background: #004466; /* Deep Teal Logo Background */
+            background: #004466;
             box-shadow: 0 4px 8px rgba(0, 68, 102, 0.2);
             border-radius: 12px;
             display: flex;
@@ -88,10 +88,9 @@
         /* Cards */
         .card {
             background: var(--color-bg-card);
-            /* Subtle Shadow for Premium Feel */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03);
-            border-radius: 16px; /* More rounded corners */
-            padding: 32px; /* Increased padding */
+            border-radius: 16px;
+            padding: 32px;
             margin-bottom: 32px;
         }
 
@@ -147,10 +146,8 @@
             margin-bottom: 20px;
         }
         
-        /* NEW ALIGNMENT STYLES */
         .form-group-flex-row {
             display: flex;
-            /* Align input and button bottoms */
             align-items: flex-end; 
             gap: 16px; 
             margin-bottom: 0;
@@ -159,7 +156,7 @@
         label {
             display: block;
             font-size: 15px;
-            font-weight: 600; /* Bolder labels */
+            font-weight: 600;
             color: var(--color-text-dark);
             margin-bottom: 10px;
         }
@@ -171,7 +168,7 @@
 
         input[type="text"] {
             flex: 1;
-            padding: 12px 16px; /* Larger input field */
+            padding: 12px 16px;
             border: 1px solid var(--color-border);
             border-radius: 8px;
             font-size: 16px;
@@ -183,12 +180,12 @@
         input[type="text"]:focus {
             outline: none;
             border-color: var(--color-primary-blue);
-            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15); /* Stronger focus shadow */
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
         }
 
         /* Buttons */
         button {
-            padding: 12px 24px; /* Larger buttons */
+            padding: 12px 24px;
             font-size: 16px;
             font-weight: 600;
             border-radius: 8px;
@@ -196,10 +193,8 @@
             transition: all 0.2s;
             border: none;
             white-space: nowrap;
-            height: 44px; /* Fix height to align perfectly with input field (12px padding + 16px font + 1px border * 2) */
+            height: 44px;
         }
-        
-        /* Removed scan-btn-fixed as horizontal alignment is handled by form-group-flex-row */
 
         .btn-primary {
             background: var(--color-primary-blue);
@@ -247,8 +242,8 @@
             display: inline-block;
             width: 14px;
             height: 14px;
-            border: 2px solid #FEF08A; /* Light yellow border */
-            border-top-color: #FACC15; /* Golden top border */
+            border: 2px solid #FEF08A;
+            border-top-color: #FACC15;
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
             margin-right: 8px;
@@ -259,7 +254,7 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px; /* Increased gap */
+            gap: 24px;
             margin-bottom: 24px;
         }
 
@@ -283,12 +278,12 @@
             color: var(--color-text-medium);
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.08em; /* Tighter tracking for enterprise labels */
+            letter-spacing: 0.08em;
             margin-bottom: 8px;
         }
 
         .stat-value {
-            font-size: 38px; /* Larger, more impactful number */
+            font-size: 38px;
             font-weight: 700;
             color: var(--color-text-dark);
         }
@@ -313,9 +308,9 @@
         .table-container {
             overflow-x: auto;
             margin-top: 24px;
-            border: 1px solid var(--color-border); /* Add an external border to the container */
+            border: 1px solid var(--color-border);
             border-radius: 8px;
-            overflow: hidden; /* Ensures border-radius applies to table */
+            overflow: hidden;
         }
 
         table {
@@ -325,8 +320,8 @@
         }
 
         th {
-            background: #F1F5F9; /* Softer header background */
-            padding: 14px 20px; /* Increased padding */
+            background: #F1F5F9;
+            padding: 14px 20px;
             text-align: left;
             font-weight: 700;
             color: var(--color-text-dark);
@@ -347,7 +342,7 @@
         }
 
         tr.clickable-row:hover {
-            background: #F8FAFC; /* Subtle hover effect */
+            background: #F8FAFC;
         }
 
         .empty-state {
@@ -358,7 +353,7 @@
 
         /* Expanded Row */
         .expanded-row {
-            background: #F1F5F9; /* Darker expanded row background */
+            background: #F1F5F9;
         }
 
         .expanded-content {
@@ -435,6 +430,81 @@
             color: var(--color-text-medium);
         }
 
+        .algo-details-btn {
+            margin-top: 12px;
+            width: 100%;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--color-bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--color-text-dark);
+            height: auto;
+        }
+
+        .algo-details-btn:hover {
+            background: #E5E7EB;
+            border-color: #CBD5E1;
+        }
+
+        .algo-findings {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--color-bg-primary);
+            border-radius: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .algo-findings.visible {
+            display: block;
+        }
+
+        .finding-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-left: 3px solid var(--color-primary-blue);
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .finding-file {
+            font-weight: 600;
+            color: var(--color-text-dark);
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .finding-line {
+            color: var(--color-text-medium);
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .finding-context {
+            background: #F9FAFB;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #374151;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .finding-match {
+            background: #FEF3C7;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: 700;
+        }
+
         /* Helper text */
         .help-text {
             font-size: 14px;
@@ -452,14 +522,9 @@
             color: #475569;
         }
 
-        /* NEW: Flex container for the two input fields */
         .input-split {
             display: flex;
             gap: 24px;
-        }
-
-        .input-split > div {
-            /* Handled by inline styles */
         }
         
         .repo-info-cell {
@@ -476,7 +541,6 @@
             color: var(--color-text-medium);
             margin-top: 6px;
         }
-
     </style>
 </head>
 <body>
@@ -484,7 +548,7 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo-section">
-                    <div class="logo">🔐</div>
+                    <div class="logo">🔒</div>
                     <div>
                         <h1>Crypto Scanner</h1>
                         <div class="subtitle">Post-Quantum Cryptography Security Analysis</div>
@@ -528,8 +592,7 @@
                     </div>
                 </div>
             </div>
-            
-            </div>
+        </div>
 
         <div class="card">
             <div class="card-header">
@@ -621,7 +684,6 @@
                     scanBtn.innerHTML = '✓ Queued';
                 }
 
-                // Refresh history ONCE to show new scan
                 await loadHistory();
 
             } catch (error) {
@@ -648,7 +710,6 @@
             refreshIcon.style.animation = 'spin 0.8s linear infinite';
             refreshBtn.disabled = true;
             
-            // Clear cache on refresh to ensure fresh details are loaded if opened
             scanDetailsCache.clear();
             await loadHistory();
             
@@ -677,6 +738,64 @@
                 showStatus('Failed to fetch scan history', 'error');
                 tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Failed to load history</td></tr>';
             }
+        }
+
+        async function loadAlgorithmFindings(scanId, algorithm) {
+            try {
+                const response = await fetch(`${API_URL}/scans/${scanId}/algorithm/${encodeURIComponent(algorithm)}/findings`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch findings');
+                }
+                const findings = await response.json();
+                return findings;
+            } catch (error) {
+                console.error('Failed to load algorithm findings:', error);
+                return null;
+            }
+        }
+
+        async function toggleAlgorithmFindings(scanId, algorithm, buttonElement) {
+            const findingsContainer = buttonElement.parentElement.querySelector('.algo-findings');
+            
+            if (findingsContainer.classList.contains('visible')) {
+                findingsContainer.classList.remove('visible');
+                buttonElement.textContent = 'Show Details';
+                return;
+            }
+
+            findingsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--color-text-medium);"><span class="spinner"></span> Loading findings...</div>';
+            findingsContainer.classList.add('visible');
+            buttonElement.textContent = 'Hide Details';
+
+            const findings = await loadAlgorithmFindings(scanId, algorithm);
+            
+            if (!findings || findings.length === 0) {
+                findingsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--color-text-medium);">No detailed findings available</div>';
+                return;
+            }
+
+            let html = '';
+            findings.forEach(finding => {
+                let contextHtml = finding.context;
+                if (finding.match_text) {
+                    const matchRegex = new RegExp(`(${escapeRegex(finding.match_text)})`, 'gi');
+                    contextHtml = contextHtml.replace(matchRegex, '<span class="finding-match">$1</span>');
+                }
+
+                html += `
+                    <div class="finding-item">
+                        <div class="finding-file">📄 ${finding.file_path}</div>
+                        <div class="finding-line">Line ${finding.line_number}</div>
+                        <div class="finding-context">${contextHtml}</div>
+                    </div>
+                `;
+            });
+
+            findingsContainer.innerHTML = html;
+        }
+
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
         function renderScansHtml(scans) {
@@ -717,7 +836,6 @@
                         statusBadge = '<span class="badge-pending status-badge">Unknown</span>';
                 }
                 
-                // Repo/Branch display cell
                 const repoCellHtml = `
                     <div class="repo-info-cell">
                         <div class="repo-url-text">${scan.repo_url}</div>
@@ -775,17 +893,13 @@
             if (!expandedRow) return;
 
             if (expandedRows.has(scanId)) {
-                // Collapse
                 expandedRow.style.display = 'none';
                 expandedRows.delete(scanId);
-                // Update button text
                 const btn = document.querySelector(`#${buttonId}`);
                 if (btn) btn.textContent = 'View Details';
             } else {
-                // Expand
                 expandedRow.style.display = 'table-row';
                 expandedRows.add(scanId);
-                // Update button text
                 const btn = document.querySelector(`#${buttonId}`);
                 if (btn) btn.textContent = 'Hide Details';
                 
@@ -850,17 +964,17 @@
             `;
 
             if (unsafe.length > 0) {
-                html += createAlgorithmSection('PQC Vulnerable Algorithms', unsafe, 'unsafe');
+                html += createAlgorithmSection('PQC Vulnerable Algorithms', unsafe, 'unsafe', data.repo_id);
             }
 
             if (safe.length > 0) {
-                html += createAlgorithmSection('PQC Safe Algorithms', safe, 'safe');
+                html += createAlgorithmSection('PQC Safe Algorithms', safe, 'safe', data.repo_id);
             }
 
             return html;
         }
 
-        function createAlgorithmSection(title, algorithms, type) {
+        function createAlgorithmSection(title, algorithms, type, scanId) {
             const badgeClass = type === 'safe' ? 'badge-safe' : 'badge-unsafe';
             const categoryClass = type === 'safe' ? 'safe' : 'unsafe';
 
@@ -881,9 +995,16 @@
                         <div class="algo-name">${algo.name}</div>
                         <div class="algo-category">${algo.category}</div>
                         <div class="algo-stats">
-                            <span>${algo.occurrences} occurrences</span>
-                            <span>${algo.files_affected || 0} files</span>
+                            <span>📊 ${algo.occurrences} occurrences</span>
+                            <span>📁 ${algo.files_affected || 0} files</span>
                         </div>
+                        <button 
+                            class="algo-details-btn" 
+                            onclick="toggleAlgorithmFindings(${scanId}, '${algo.name.replace(/'/g, "\\'")}', this)"
+                        >
+                            Show Details
+                        </button>
+                        <div class="algo-findings"></div>
                     </div>
                 `;
             });
@@ -892,17 +1013,14 @@
             return html;
         }
 
-        // IMPORTANT: Initial load ONLY on page load
         window.addEventListener('load', () => {
             loadHistory();
         });
 
-        // Enter key support for scan input
         document.getElementById('repoUrl').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') scanRepository();
         });
         
-        // Enter key support for branch input
         document.getElementById('repoBranch').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') scanRepository();
         });
