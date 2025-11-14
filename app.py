@@ -1,5 +1,3 @@
-
-
 import re
 import os
 import sys
@@ -385,28 +383,21 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # --- NEW: Check and add 'branch_name' column if it doesn't exist ---
         cursor.execute("PRAGMA table_info(repositories)")
         columns = [col[1] for col in cursor.fetchall()]
         
         if 'branch_name' not in columns:
             try:
-                # Add branch_name column with a default of 'main' 
-                # (or master for older repos, but 'main' is a safe modern default)
                 cursor.execute('ALTER TABLE repositories ADD COLUMN branch_name TEXT DEFAULT "main"')
             except sqlite3.OperationalError:
-                # If table doesn't exist yet, it will be created below
                 pass
-        # --- END NEW CHECK ---
         
-        # Create repositories table (updated to include branch_name if fresh)
-        # Note: If the table already exists, the ALTER TABLE above handles the new column.
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS repositories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 repo_url TEXT NOT NULL,
                 repo_hash TEXT NOT NULL,
-                branch_name TEXT DEFAULT 'main', -- NEW COLUMN
+                branch_name TEXT DEFAULT 'main',
                 last_scanned TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 scan_status TEXT DEFAULT 'pending',
                 total_files INTEGER DEFAULT 0,
@@ -416,7 +407,7 @@ class Database:
                 current_status TEXT DEFAULT 'Queued for scanning',
                 total_files_to_scan INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(repo_url, repo_hash, branch_name) -- UNIQUE constraint on the combination
+                UNIQUE(repo_url, repo_hash, branch_name)
             )
         ''')
 
@@ -445,15 +436,13 @@ class Database:
             )
         ''')
         
-        # Updated index to include branch_name for faster lookups
-        cursor.execute('DROP INDEX IF EXISTS idx_repo_hash') # Drop old index to recreate new one (optional, but cleaner)
+        cursor.execute('DROP INDEX IF EXISTS idx_repo_hash')
         cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_repo_url_hash_branch ON repositories(repo_url, repo_hash, branch_name)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_scan_status ON repositories(scan_status)')
         
         conn.commit()
         conn.close()
     
-    # Updated: Now takes branch_name for accurate cache checking
     def get_cached_scan(self, repo_url: str, repo_hash: str, branch_name: str) -> Optional[Dict]:
         """Check if completed scan exists for this repo hash and branch"""
         conn = sqlite3.connect(self.db_path)
@@ -487,14 +476,12 @@ class Database:
             }
         return None
     
-    # Updated: Now takes branch_name
     def create_scan_record(self, repo_url: str, repo_hash: str, branch_name: str) -> int:
         """Create initial scan record with 'pending' status"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
         try:
-            # NEW: Insert branch_name
             cursor.execute('''
                 INSERT INTO repositories 
                 (repo_url, repo_hash, branch_name, scan_status, current_status, created_at)
@@ -505,8 +492,6 @@ class Database:
             conn.commit()
             return repo_id
         except sqlite3.IntegrityError:
-            # Repo + Branch already exists (or a specific repo_hash + branch combo), update it
-            # Using repo_url and branch_name to find the record to update
             cursor.execute('''
                 UPDATE repositories 
                 SET repo_hash = ?, 
@@ -518,13 +503,10 @@ class Database:
             conn.commit()
             cursor.execute('SELECT id FROM repositories WHERE repo_url = ? AND branch_name = ?', (repo_url, branch_name))
             
-            # Handle case where record might not be found if an old record existed without a branch_name
-            # This is a safe fallback for schema update
             row = cursor.fetchone()
             if row:
                 return row[0]
             else:
-                 # Re-run insert if update failed (shouldn't happen with correct UNIQUE constraint setup)
                 cursor.execute('''
                     INSERT INTO repositories 
                     (repo_url, repo_hash, branch_name, scan_status, current_status, created_at)
@@ -532,17 +514,14 @@ class Database:
                 ''', (repo_url, repo_hash, branch_name))
                 conn.commit()
                 return cursor.lastrowid
-
         finally:
             conn.close()
 
-    # Updated: Now retrieves branch_name
     def get_pending_scans(self) -> List[Dict]:
         """Get all pending scans ordered by creation time"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # NEW: Retrieve branch_name
         cursor.execute('''
             SELECT id, repo_url, repo_hash, branch_name, created_at
             FROM repositories 
@@ -556,7 +535,7 @@ class Database:
                 'id': row[0],
                 'repo_url': row[1],
                 'repo_hash': row[2],
-                'branch_name': row[3], # NEW
+                'branch_name': row[3],
                 'created_at': row[4]
             })
         
@@ -617,7 +596,6 @@ class Database:
                 repo_id
             ))
             
-            # Delete old scan results if they exist
             cursor.execute('DELETE FROM scan_results WHERE repo_id = ?', (repo_id,))
             
             for algo, data in scan_data['algorithms'].items():
@@ -673,13 +651,11 @@ class Database:
         conn.commit()
         conn.close()
     
-    # Updated: Now retrieves branch_name
     def get_scan_details(self, repo_id: int) -> Dict:
         """Retrieve complete scan details"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # NEW: Retrieve branch_name (column 3)
         cursor.execute('''
             SELECT id, repo_url, repo_hash, branch_name, last_scanned, scan_status,
                    total_files, total_algorithms, pqc_safe_count, pqc_vulnerable_count,
@@ -713,7 +689,7 @@ class Database:
             'repo_id': repo[0],
             'repo_url': repo[1],
             'repo_hash': repo[2],
-            'branch_name': repo[3], # NEW
+            'branch_name': repo[3],
             'last_scanned': repo[4],
             'scan_status': repo[5],
             'total_files': repo[6],
@@ -725,13 +701,11 @@ class Database:
             'algorithms': algorithms
         }
     
-    # Updated: Now retrieves branch_name
     def get_all_scans(self) -> List[Dict]:
         """Get list of all scans"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # NEW: Retrieve branch_name (column 3)
         cursor.execute('''
             SELECT id, repo_url, repo_hash, branch_name, last_scanned, scan_status,
                    total_files, pqc_safe_count, pqc_vulnerable_count,
@@ -746,7 +720,7 @@ class Database:
                 'id': row[0],
                 'repo_url': row[1],
                 'repo_hash': row[2],
-                'branch_name': row[3], # NEW
+                'branch_name': row[3],
                 'last_scanned': row[4],
                 'scan_status': row[5],
                 'total_files': row[6],
@@ -781,8 +755,6 @@ class CryptoScanner:
     
     def get_repo_hash(self) -> str:
         """Get repository commit hash"""
-        # NOTE: Git hash is specific to the content, so even if the branch is 
-        # checked out, the hash of the HEAD commit is what we need for cache check.
         try:
             result = subprocess.run(
                 ['git', '-C', str(self.repo_path), 'rev-parse', 'HEAD'],
@@ -879,33 +851,27 @@ class CryptoScanner:
         }
 
 
-# Updated: Now takes branch_name
 def process_scan_job(repo_id: int, repo_url: str, branch_name: str):
     """Process a single scan job"""
     temp_dir = None
     
     try:
-        # Mark as processing
         db.mark_scan_processing(repo_id)
         
-        # Clone repository - NEW: include branch_name
         temp_dir = tempfile.mkdtemp()
         subprocess.run(
             ['git', 'clone', '--depth', '1', '--branch', branch_name, repo_url, temp_dir],
             check=True,
             capture_output=True,
-            timeout=300 # 5 minute timeout for cloning
+            timeout=300
         )
         
-        # Initialize scanner
         scanner = CryptoScanner(temp_dir)
         
-        # Get all files
         all_files_to_scan = scanner.get_all_code_files()
         total_files = len(all_files_to_scan)
         db.update_scan_progress(repo_id, 0, total_files, f'Preparing to scan branch {branch_name}...')
 
-        # Perform scan
         scanned_count = 0
         for file_path in all_files_to_scan:
             file_results = scanner.scan_file(file_path)
@@ -913,7 +879,6 @@ def process_scan_job(repo_id: int, repo_url: str, branch_name: str):
                 scanner.findings[algo].extend(occurrences)
             
             scanned_count += 1
-            # Update progress every 10 files to reduce DB writes
             if scanned_count % 10 == 0 or scanned_count == total_files:
                 db.update_scan_progress(
                     repo_id, 
@@ -923,7 +888,6 @@ def process_scan_job(repo_id: int, repo_url: str, branch_name: str):
                 )
             scanner.file_count = scanned_count
             
-        # Save results
         results = scanner.get_results()
         results['total_files'] = scanned_count
         db.save_scan_results(repo_id, results)
@@ -942,7 +906,6 @@ def process_scan_job(repo_id: int, repo_url: str, branch_name: str):
         print(f"✗ Scan failed for ID {repo_id}: {e}", file=sys.stderr)
         db.mark_scan_failed(repo_id, str(e))
     finally:
-        # Enhanced cleanup with retry logic
         if temp_dir:
             MAX_RETRIES = 5
             DELAY_SECONDS = 0.5
@@ -967,21 +930,17 @@ def job_queue_worker():
     
     while True:
         try:
-            # Get pending scans
             pending_scans = db.get_pending_scans()
             
             if pending_scans:
-                # Process the first pending scan
                 scan = pending_scans[0]
                 print(f"📋 Processing scan job: {scan['repo_url']} (Branch: {scan['branch_name']}, ID: {scan['id']})")
-                # Updated: Pass branch_name to processing function
                 process_scan_job(scan['id'], scan['repo_url'], scan['branch_name'])
             
-            # Wait 5 seconds before checking again
             time.sleep(5)
             
         except Exception as e:
-            print(f"❌ Error in job queue worker: {e}", file=sys.stderr)
+            print(f"⚠ Error in job queue worker: {e}", file=sys.stderr)
             time.sleep(5)
 
 
@@ -1001,13 +960,11 @@ def index():
     return send_from_directory('static', 'index.html')
 
 
-# Updated: Handle branch_name in API endpoint
 @app.route('/api/scan', methods=['POST'])
 def scan_repository_endpoint():
     """Queue a scan request (checks cache first)"""
     data = request.json
     repo_url = data.get('repo_url')
-    # NEW: Get branch name, default to 'main'
     branch_name = data.get('branch_name', 'main').strip() or 'main' 
     
     if not repo_url:
@@ -1016,7 +973,6 @@ def scan_repository_endpoint():
     temp_dir = None
     
     try:
-        # Quick clone to get hash for cache checking - NEW: use specific branch
         temp_dir = tempfile.mkdtemp()
         subprocess.run(
             ['git', 'clone', '--depth', '1', '--branch', branch_name, repo_url, temp_dir],
@@ -1028,7 +984,6 @@ def scan_repository_endpoint():
         temp_scanner = CryptoScanner(temp_dir)
         repo_hash = temp_scanner.get_repo_hash()
         
-        # Check cache - NEW: include repo_url and branch_name in cache check
         cached = db.get_cached_scan(repo_url, repo_hash, branch_name)
         if cached:
             shutil.rmtree(temp_dir, ignore_errors=True)
@@ -1037,16 +992,14 @@ def scan_repository_endpoint():
             details['message'] = 'Using cached scan results'
             return jsonify(details), 200
         
-        # Not cached - create pending job - NEW: include branch_name
         repo_id = db.create_scan_record(repo_url, repo_hash, branch_name)
         
-        # Clean up temp clone
         shutil.rmtree(temp_dir, ignore_errors=True)
         
         return jsonify({
             'repo_id': repo_id,
             'repo_url': repo_url,
-            'branch_name': branch_name, # NEW
+            'branch_name': branch_name,
             'repo_hash': repo_hash,
             'scan_status': 'pending',
             'current_status': 'Queued for scanning',
@@ -1090,6 +1043,48 @@ def get_scan_details_endpoint(scan_id):
         return jsonify({'error': f'Internal server error: {str(e)}'}), 500
 
 
+@app.route('/api/scans/<int:scan_id>/algorithm/<string:algorithm>/findings', methods=['GET'])
+def get_algorithm_findings(scan_id, algorithm):
+    """Get detailed findings for a specific algorithm in a scan"""
+    try:
+        conn = sqlite3.connect(db.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id FROM scan_results 
+            WHERE repo_id = ? AND algorithm = ?
+        ''', (scan_id, algorithm))
+        
+        result = cursor.fetchone()
+        if not result:
+            conn.close()
+            return jsonify({'error': 'Algorithm not found in this scan'}), 404
+        
+        scan_result_id = result[0]
+        
+        cursor.execute('''
+            SELECT file_path, line_number, context, match_text
+            FROM findings
+            WHERE scan_result_id = ?
+            ORDER BY file_path, line_number
+        ''', (scan_result_id,))
+        
+        findings = []
+        for row in cursor.fetchall():
+            findings.append({
+                'file_path': row[0],
+                'line_number': row[1],
+                'context': row[2],
+                'match_text': row[3]
+            })
+        
+        conn.close()
+        return jsonify(findings)
+        
+    except Exception as e:
+        return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+
+
 @app.route('/api/queue/status', methods=['GET'])
 def get_queue_status():
     """Get current queue status"""
@@ -1114,7 +1109,7 @@ def get_queue_status():
             'in_progress_count': in_progress_count,
             'completed_count': completed_count,
             'failed_count': failed_count,
-            'pending_jobs': pending[:5] # Return first 5 pending jobs
+            'pending_jobs': pending[:5]
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
