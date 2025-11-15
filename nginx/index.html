@@ -141,6 +141,24 @@
             color: var(--color-info);
         }
 
+        /* Platform Badge */
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .platform-github { background: #F0F6FC; color: #0969DA; }
+        .platform-gitlab { background: #FDF6F3; color: #E24329; }
+        .platform-bitbucket { background: #F0F5FF; color: #0052CC; }
+        .platform-azure { background: #F0F5FF; color: #0078D4; }
+        .platform-generic { background: #F1F5F9; color: #475569; }
+
         /* Form Elements */
         .form-group {
             margin-bottom: 20px;
@@ -536,10 +554,20 @@
             font-weight: 600;
         }
         
-        .repo-branch-text {
+        .repo-meta-text {
             font-size: 13px;
             color: var(--color-text-medium);
             margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .platform-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -551,7 +579,7 @@
                     <div class="logo">🔒</div>
                     <div>
                         <h1>Crypto Scanner</h1>
-                        <div class="subtitle">Post-Quantum Cryptography Security Analysis</div>
+                        <div class="subtitle">Post-Quantum Cryptography Security Analysis • Multi-Platform Support</div>
                     </div>
                 </div>
             </div>
@@ -562,19 +590,22 @@
         <div class="card">
             <div class="card-header">
                 <div class="card-title">Repository Scan</div>
-                <div class="card-description">Analyze GitHub repositories for cryptographic algorithm usage and PQC readiness</div>
+                <div class="card-description">Analyze Git repositories from GitHub, GitLab, Bitbucket, Azure DevOps, and more for cryptographic algorithms and PQC readiness</div>
             </div>
 
             <div id="statusBanner" class="status-banner"></div>
 
             <div class="input-split">
                 <div class="form-group" style="flex: 2;">
-                    <label for="repoUrl">GitHub Repository URL</label>
+                    <label for="repoUrl">Repository URL</label>
                     <input 
                         type="text" 
                         id="repoUrl" 
-                        placeholder="https://github.com/username/repository"
+                        placeholder="https://github.com/user/repo or https://gitlab.com/user/project"
                     >
+                    <div class="help-text">
+                        Supports: GitHub, GitLab, Bitbucket, Azure DevOps, Gitea, Codeberg, and any Git-compatible repository
+                    </div>
                 </div>
 
                 <div class="form-group" style="width: 400px; flex: 0 0 400px;">
@@ -599,7 +630,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div class="card-title">Scan History</div>
-                        <div class="card-description">Review previous analysis results for your codebases.</div>
+                        <div class="card-description">Review previous analysis results for your codebases across all platforms.</div>
                     </div>
                     <button onclick="refreshHistory()" id="refreshBtn" class="btn-secondary">
                         <span id="refreshIcon">🔄</span> Refresh
@@ -611,7 +642,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Repository & Branch</th>
+                            <th>Repository & Platform</th>
                             <th>Status</th>
                             <th>Last Updated</th>
                             <th>Files</th>
@@ -634,6 +665,16 @@
         const API_URL = '/api';
         let expandedRows = new Set();
         let scanDetailsCache = new Map();
+
+        const platformIcons = {
+            'GitHub': '🐙',
+            'GitLab': '🦊',
+            'Bitbucket': '🪣',
+            'Azure DevOps': '☁️',
+            'Gitea': '🍵',
+            'Codeberg': '⛰️',
+            'Generic Git': '🔧'
+        };
 
         function showStatus(message, type = 'info') {
             const banner = document.getElementById('statusBanner');
@@ -677,10 +718,10 @@
                 }
 
                 if (data.cached) {
-                    showStatus('✓ Using cached scan results', 'success');
+                    showStatus(`✓ Using cached scan results for ${data.platform}`, 'success');
                     scanBtn.innerHTML = '✓ Used Cache';
                 } else {
-                    showStatus(`✓ Scan queued successfully for branch "${data.branch_name}"! Click "Refresh" to check progress.`, 'success');
+                    showStatus(`✓ Scan queued successfully for ${data.platform} branch "${data.branch_name}"! Click "Refresh" to check progress.`, 'success');
                     scanBtn.innerHTML = '✓ Queued';
                 }
 
@@ -798,11 +839,22 @@
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
+        function getPlatformBadgeClass(platform) {
+            const platformLower = (platform || 'generic git').toLowerCase();
+            if (platformLower.includes('github')) return 'platform-github';
+            if (platformLower.includes('gitlab')) return 'platform-gitlab';
+            if (platformLower.includes('bitbucket')) return 'platform-bitbucket';
+            if (platformLower.includes('azure')) return 'platform-azure';
+            return 'platform-generic';
+        }
+
         function renderScansHtml(scans) {
             return scans.map(scan => {
                 let statusBadge;
                 const canView = scan.scan_status === 'completed' || scan.scan_status === 'cached';
                 const isExpanded = expandedRows.has(scan.id);
+                const platform = scan.platform || 'Generic Git';
+                const platformIcon = platformIcons[platform] || '🔧';
                 
                 const fileCountDisplay = (scan.scan_status === 'in_progress' && scan.total_files_to_scan > 0) 
                     ? `${scan.total_files || 0} / ${scan.total_files_to_scan}` 
@@ -839,7 +891,13 @@
                 const repoCellHtml = `
                     <div class="repo-info-cell">
                         <div class="repo-url-text">${scan.repo_url}</div>
-                        <div class="repo-branch-text">Branch: <code>${scan.branch_name || 'main'}</code></div>
+                        <div class="repo-meta-text">
+                            <span class="platform-indicator">
+                                <span>${platformIcon}</span>
+                                <span class="platform-badge ${getPlatformBadgeClass(platform)}">${platform}</span>
+                            </span>
+                            <span>Branch: <code>${scan.branch_name || 'main'}</code></span>
+                        </div>
                     </div>
                 `;
                 
@@ -922,6 +980,8 @@
             const algorithms = data.algorithms || {};
             const safe = [];
             const unsafe = [];
+            const platform = data.platform || 'Generic Git';
+            const platformIcon = platformIcons[platform] || '🔧';
 
             Object.entries(algorithms).forEach(([name, info]) => {
                 if (info.pqc_safe) {
@@ -936,6 +996,7 @@
                     <div style="background: #E2E8F0; padding: 20px; border-radius: 10px; margin-bottom: 24px; font-weight: 500;">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; font-size: 14px; color: #475569;">
                             <div><strong>Repo URL:</strong> <a href="${data.repo_url}" target="_blank" style="color: var(--color-primary-blue); text-decoration: none;">${data.repo_url}</a></div>
+                            <div><strong>Platform:</strong> <span style="display: inline-flex; align-items: center; gap: 4px;">${platformIcon} ${platform}</span></div>
                             <div><strong>Branch:</strong> <code>${data.branch_name || 'main'}</code></div>
                             <div><strong>Commit Hash:</strong> <code>${data.repo_hash}</code></div>
                             <div><strong>Last Scanned:</strong> ${new Date(data.last_scanned).toLocaleString()}</div>
