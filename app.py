@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from collections import defaultdict
 from typing import Dict, List, Tuple, Set, Optional
+from urllib.parse import urlparse
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
@@ -371,6 +372,123 @@ CODE_EXTENSIONS = {
 }
 
 
+class RepoUrlParser:
+    """Parse and identify Git repository URLs from various platforms"""
+    
+    @staticmethod
+    def detect_platform(repo_url: str) -> str:
+        """Detect the Git platform from URL"""
+        url_lower = repo_url.lower()
+        
+        if 'github.com' in url_lower:
+            return 'GitHub'
+        elif 'gitlab.com' in url_lower or 'gitlab' in url_lower:
+            return 'GitLab'
+        elif 'bitbucket.org' in url_lower or 'bitbucket' in url_lower:
+            return 'Bitbucket'
+        elif 'azure.com' in url_lower or 'visualstudio.com' in url_lower:
+            return 'Azure DevOps'
+        elif 'gitea' in url_lower:
+            return 'Gitea'
+        elif 'codeberg.org' in url_lower:
+            return 'Codeberg'
+        elif 'sourceforge' in url_lower:
+            return 'SourceForge'
+        else:
+            return 'Generic Git'
+    
+    @staticmethod
+    def normalize_url(repo_url: str) -> str:
+        """Normalize Git URL to clone format"""
+        repo_url = repo_url.strip()
+        
+        # Remove trailing slashes
+        repo_url = repo_url.rstrip('/')
+        
+        # Handle HTTPS URLs
+        if repo_url.startswith('http://') or repo_url.startswith('https://'):
+            # Remove .git suffix if present
+            if repo_url.endswith('.git'):
+                return repo_url
+            
+            # Check if it's a web URL that needs conversion
+            parsed = urlparse(repo_url)
+            
+            # GitHub URL patterns
+            if 'github.com' in parsed.netloc:
+                # Remove /tree/branch or /blob/branch patterns
+                path = re.sub(r'/tree/[^/]+/?.*$', '', parsed.path)
+                path = re.sub(r'/blob/[^/]+/?.*$', '', parsed.path)
+                return f"https://github.com{path}.git"
+            
+            # GitLab URL patterns
+            elif 'gitlab' in parsed.netloc:
+                path = re.sub(r'/-/tree/[^/]+/?.*$', '', parsed.path)
+                path = re.sub(r'/-/blob/[^/]+/?.*$', '', parsed.path)
+                if not path.endswith('.git'):
+                    path += '.git'
+                return f"{parsed.scheme}://{parsed.netloc}{path}"
+            
+            # Bitbucket URL patterns
+            elif 'bitbucket' in parsed.netloc:
+                path = re.sub(r'/src/[^/]+/?.*$', '', parsed.path)
+                if not path.endswith('.git'):
+                    path += '.git'
+                return f"{parsed.scheme}://{parsed.netloc}{path}"
+            
+            # Azure DevOps patterns
+            elif 'dev.azure.com' in parsed.netloc or 'visualstudio.com' in parsed.netloc:
+                # Azure URLs can be complex, try to keep as is
+                if not repo_url.endswith('.git'):
+                    return repo_url + '.git'
+                return repo_url
+            
+            # Generic HTTPS - add .git if not present
+            else:
+                if not repo_url.endswith('.git'):
+                    return repo_url + '.git'
+                return repo_url
+        
+        # SSH URLs (git@...)
+        elif repo_url.startswith('git@'):
+            return repo_url
+        
+        # Git protocol URLs
+        elif repo_url.startswith('git://'):
+            return repo_url
+        
+        # Assume it's a short form like "user/repo" for GitHub
+        elif '/' in repo_url and not repo_url.startswith('http'):
+            return f"https://github.com/{repo_url}.git"
+        
+        return repo_url
+    
+    @staticmethod
+    def validate_url(repo_url: str) -> Tuple[bool, str]:
+        """Validate if URL is a valid Git repository URL"""
+        if not repo_url or not repo_url.strip():
+            return False, "Repository URL is empty"
+        
+        repo_url = repo_url.strip()
+        
+        # Check for valid URL patterns
+        valid_patterns = [
+            r'^https?://',  # HTTP(S) URLs
+            r'^git@',       # SSH URLs
+            r'^git://',     # Git protocol
+            r'^[\w-]+/[\w-]+$',  # Short form (user/repo)
+        ]
+        
+        if not any(re.match(pattern, repo_url) for pattern in valid_patterns):
+            return False, "Invalid repository URL format"
+        
+        # Check for suspicious patterns
+        if ' ' in repo_url:
+            return False, "Repository URL contains spaces"
+        
+        return True, "Valid URL"
+
+
 class Database:
     """SQLite database manager for scan results with job queue"""
     
@@ -392,12 +510,19 @@ class Database:
             except sqlite3.OperationalError:
                 pass
         
+        if 'platform' not in columns:
+            try:
+                cursor.execute('ALTER TABLE repositories ADD COLUMN platform TEXT DEFAULT "GitHub"')
+            except sqlite3.OperationalError:
+                pass
+        
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS repositories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 repo_url TEXT NOT NULL,
                 repo_hash TEXT NOT NULL,
                 branch_name TEXT DEFAULT 'main',
+                platform TEXT DEFAULT 'GitHub',
                 last_scanned TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 scan_status TEXT DEFAULT 'pending',
                 total_files INTEGER DEFAULT 0,
@@ -449,7 +574,7 @@ class Database:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT id, repo_url, last_scanned, scan_status, 
+            SELECT id, repo_url, platform, last_scanned, scan_status, 
                    total_files, total_algorithms, pqc_safe_count, pqc_vulnerable_count,
                    current_status, total_files_to_scan
             FROM repositories 
@@ -464,19 +589,20 @@ class Database:
             return {
                 'id': row[0],
                 'repo_url': row[1],
-                'last_scanned': row[2],
+                'platform': row[2],
+                'last_scanned': row[3],
                 'scan_status': 'cached',
-                'total_files': row[4],
-                'total_algorithms': row[5],
-                'pqc_safe_count': row[6],
-                'pqc_vulnerable_count': row[7],
+                'total_files': row[5],
+                'total_algorithms': row[6],
+                'pqc_safe_count': row[7],
+                'pqc_vulnerable_count': row[8],
                 'current_status': 'Using cached results',
-                'total_files_to_scan': row[9],
+                'total_files_to_scan': row[10],
                 'cached': True
             }
         return None
     
-    def create_scan_record(self, repo_url: str, repo_hash: str, branch_name: str) -> int:
+    def create_scan_record(self, repo_url: str, repo_hash: str, branch_name: str, platform: str) -> int:
         """Create initial scan record with 'pending' status"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -484,9 +610,9 @@ class Database:
         try:
             cursor.execute('''
                 INSERT INTO repositories 
-                (repo_url, repo_hash, branch_name, scan_status, current_status, created_at)
-                VALUES (?, ?, ?, 'pending', 'Queued for scanning', CURRENT_TIMESTAMP)
-            ''', (repo_url, repo_hash, branch_name))
+                (repo_url, repo_hash, branch_name, platform, scan_status, current_status, created_at)
+                VALUES (?, ?, ?, ?, 'pending', 'Queued for scanning', CURRENT_TIMESTAMP)
+            ''', (repo_url, repo_hash, branch_name, platform))
             
             repo_id = cursor.lastrowid
             conn.commit()
@@ -495,11 +621,12 @@ class Database:
             cursor.execute('''
                 UPDATE repositories 
                 SET repo_hash = ?, 
+                    platform = ?,
                     scan_status = 'pending',
                     current_status = 'Queued for scanning',
                     created_at = CURRENT_TIMESTAMP
                 WHERE repo_url = ? AND branch_name = ?
-            ''', (repo_hash, repo_url, branch_name))
+            ''', (repo_hash, platform, repo_url, branch_name))
             conn.commit()
             cursor.execute('SELECT id FROM repositories WHERE repo_url = ? AND branch_name = ?', (repo_url, branch_name))
             
@@ -509,9 +636,9 @@ class Database:
             else:
                 cursor.execute('''
                     INSERT INTO repositories 
-                    (repo_url, repo_hash, branch_name, scan_status, current_status, created_at)
-                    VALUES (?, ?, ?, 'pending', 'Queued for scanning', CURRENT_TIMESTAMP)
-                ''', (repo_url, repo_hash, branch_name))
+                    (repo_url, repo_hash, branch_name, platform, scan_status, current_status, created_at)
+                    VALUES (?, ?, ?, ?, 'pending', 'Queued for scanning', CURRENT_TIMESTAMP)
+                ''', (repo_url, repo_hash, branch_name, platform))
                 conn.commit()
                 return cursor.lastrowid
         finally:
@@ -523,7 +650,7 @@ class Database:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT id, repo_url, repo_hash, branch_name, created_at
+            SELECT id, repo_url, repo_hash, branch_name, platform, created_at
             FROM repositories 
             WHERE scan_status = 'pending'
             ORDER BY created_at ASC
@@ -536,7 +663,8 @@ class Database:
                 'repo_url': row[1],
                 'repo_hash': row[2],
                 'branch_name': row[3],
-                'created_at': row[4]
+                'platform': row[4],
+                'created_at': row[5]
             })
         
         conn.close()
@@ -657,7 +785,7 @@ class Database:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT id, repo_url, repo_hash, branch_name, last_scanned, scan_status,
+            SELECT id, repo_url, repo_hash, branch_name, platform, last_scanned, scan_status,
                    total_files, total_algorithms, pqc_safe_count, pqc_vulnerable_count,
                    current_status, total_files_to_scan
             FROM repositories 
@@ -690,14 +818,15 @@ class Database:
             'repo_url': repo[1],
             'repo_hash': repo[2],
             'branch_name': repo[3],
-            'last_scanned': repo[4],
-            'scan_status': repo[5],
-            'total_files': repo[6],
-            'total_algorithms': repo[7],
-            'pqc_safe_count': repo[8],
-            'pqc_vulnerable_count': repo[9],
-            'current_status': repo[10],
-            'total_files_to_scan': repo[11],
+            'platform': repo[4],
+            'last_scanned': repo[5],
+            'scan_status': repo[6],
+            'total_files': repo[7],
+            'total_algorithms': repo[8],
+            'pqc_safe_count': repo[9],
+            'pqc_vulnerable_count': repo[10],
+            'current_status': repo[11],
+            'total_files_to_scan': repo[12],
             'algorithms': algorithms
         }
     
@@ -707,7 +836,7 @@ class Database:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT id, repo_url, repo_hash, branch_name, last_scanned, scan_status,
+            SELECT id, repo_url, repo_hash, branch_name, platform, last_scanned, scan_status,
                    total_files, pqc_safe_count, pqc_vulnerable_count,
                    current_status, total_files_to_scan
             FROM repositories 
@@ -721,13 +850,14 @@ class Database:
                 'repo_url': row[1],
                 'repo_hash': row[2],
                 'branch_name': row[3],
-                'last_scanned': row[4],
-                'scan_status': row[5],
-                'total_files': row[6],
-                'pqc_safe_count': row[7],
-                'pqc_vulnerable_count': row[8],
-                'current_status': row[9],
-                'total_files_to_scan': row[10]
+                'platform': row[4],
+                'last_scanned': row[5],
+                'scan_status': row[6],
+                'total_files': row[7],
+                'pqc_safe_count': row[8],
+                'pqc_vulnerable_count': row[9],
+                'current_status': row[10],
+                'total_files_to_scan': row[11]
             })
         
         conn.close()
@@ -934,7 +1064,7 @@ def job_queue_worker():
             
             if pending_scans:
                 scan = pending_scans[0]
-                print(f"📋 Processing scan job: {scan['repo_url']} (Branch: {scan['branch_name']}, ID: {scan['id']})")
+                print(f"📋 Processing scan job: {scan['repo_url']} (Branch: {scan['branch_name']}, Platform: {scan['platform']}, ID: {scan['id']})")
                 process_scan_job(scan['id'], scan['repo_url'], scan['branch_name'])
             
             time.sleep(5)
@@ -948,6 +1078,7 @@ def job_queue_worker():
 app = Flask(__name__, static_folder='static')
 CORS(app)
 db = Database()
+url_parser = RepoUrlParser()
 
 # Start job queue worker in background thread
 worker_thread = threading.Thread(target=job_queue_worker, daemon=True)
@@ -960,6 +1091,31 @@ def index():
     return send_from_directory('static', 'index.html')
 
 
+@app.route('/api/validate-url', methods=['POST'])
+def validate_url_endpoint():
+    """Validate and parse repository URL"""
+    data = request.json
+    repo_url = data.get('repo_url', '').strip()
+    
+    if not repo_url:
+        return jsonify({'valid': False, 'error': 'Repository URL is required'}), 400
+    
+    is_valid, message = url_parser.validate_url(repo_url)
+    
+    if not is_valid:
+        return jsonify({'valid': False, 'error': message}), 400
+    
+    normalized_url = url_parser.normalize_url(repo_url)
+    platform = url_parser.detect_platform(normalized_url)
+    
+    return jsonify({
+        'valid': True,
+        'normalized_url': normalized_url,
+        'platform': platform,
+        'message': f'Valid {platform} repository URL'
+    }), 200
+
+
 @app.route('/api/scan', methods=['POST'])
 def scan_repository_endpoint():
     """Queue a scan request (checks cache first)"""
@@ -970,12 +1126,21 @@ def scan_repository_endpoint():
     if not repo_url:
         return jsonify({'error': 'repo_url is required'}), 400
     
+    # Validate URL
+    is_valid, validation_msg = url_parser.validate_url(repo_url)
+    if not is_valid:
+        return jsonify({'error': validation_msg}), 400
+    
+    # Normalize URL
+    normalized_url = url_parser.normalize_url(repo_url)
+    platform = url_parser.detect_platform(normalized_url)
+    
     temp_dir = None
     
     try:
         temp_dir = tempfile.mkdtemp()
         subprocess.run(
-            ['git', 'clone', '--depth', '1', '--branch', branch_name, repo_url, temp_dir],
+            ['git', 'clone', '--depth', '1', '--branch', branch_name, normalized_url, temp_dir],
             check=True,
             capture_output=True,
             timeout=60
@@ -984,26 +1149,28 @@ def scan_repository_endpoint():
         temp_scanner = CryptoScanner(temp_dir)
         repo_hash = temp_scanner.get_repo_hash()
         
-        cached = db.get_cached_scan(repo_url, repo_hash, branch_name)
+        cached = db.get_cached_scan(normalized_url, repo_hash, branch_name)
         if cached:
             shutil.rmtree(temp_dir, ignore_errors=True)
             details = db.get_scan_details(cached['id'])
             details['cached'] = True
             details['message'] = 'Using cached scan results'
+            details['platform'] = platform
             return jsonify(details), 200
         
-        repo_id = db.create_scan_record(repo_url, repo_hash, branch_name)
+        repo_id = db.create_scan_record(normalized_url, repo_hash, branch_name, platform)
         
         shutil.rmtree(temp_dir, ignore_errors=True)
         
         return jsonify({
             'repo_id': repo_id,
-            'repo_url': repo_url,
+            'repo_url': normalized_url,
             'branch_name': branch_name,
+            'platform': platform,
             'repo_hash': repo_hash,
             'scan_status': 'pending',
             'current_status': 'Queued for scanning',
-            'message': f'Scan request queued successfully for branch "{branch_name}". Worker will process it shortly.',
+            'message': f'Scan request queued successfully for {platform} branch "{branch_name}". Worker will process it shortly.',
             'created_at': datetime.now().isoformat()
         }), 202
         
@@ -1011,9 +1178,9 @@ def scan_repository_endpoint():
         if temp_dir:
             shutil.rmtree(temp_dir, ignore_errors=True)
         error_msg = e.stderr.decode() if e.stderr else 'Failed to clone repository'
-        if 'did not match any remote' in error_msg:
-             error_msg = f"Branch '{branch_name}' not found or repository failed to clone."
-        return jsonify({'error': f'Failed to clone repository. Please check the URL/Branch. Details: {error_msg}'}), 400
+        if 'did not match any remote' in error_msg or 'not found' in error_msg.lower():
+             error_msg = f"Branch '{branch_name}' not found or repository failed to clone from {platform}."
+        return jsonify({'error': f'Failed to clone repository from {platform}. Please check the URL/Branch. Details: {error_msg}'}), 400
     except subprocess.TimeoutExpired:
         if temp_dir:
             shutil.rmtree(temp_dir, ignore_errors=True)
